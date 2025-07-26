@@ -1,104 +1,124 @@
-# 🚀 Conversor de Excel - Operadora de Saúde
+# Conversor de Excel
 
-Uma aplicação web moderna para conversão de arquivos Excel com suporte a múltiplos tipos de operação para operadoras de saúde.
+Uma aplicação web moderna para converter arquivos Excel seguindo parâmetros personalizáveis de mapeamento de colunas.
 
-## ✨ Funcionalidades
+## 🚀 Funcionalidades
 
-### 📊 Tipos de Operação Suportados
-- **Inclusão de Titular**: 52 campos específicos para cadastro de titulares
-- **Inclusão de Dependente**: 30 campos para cadastro de dependentes
-- **Exclusão**: 20 campos para processos de exclusão
-- **Geral**: Campos genéricos para outras operações
+- **Upload de Arquivos Excel**: Suporte para arquivos .xlsx e .xls
+- **Drag & Drop**: Interface intuitiva para arrastar e soltar arquivos
+- **Prévia dos Dados**: Visualização dos dados antes da conversão
+- **Mapeamento de Colunas**: Configuração personalizada de quais colunas representam cada tipo de dado
+- **Conversão Inteligente**: Processamento automático seguindo os parâmetros definidos
+- **Download de Template**: Template de exemplo para facilitar o uso
+- **Interface Responsiva**: Funciona perfeitamente em desktop e mobile
 
-### 🔧 Recursos Principais
-- **Upload Drag & Drop**: Interface intuitiva para upload de arquivos
-- **Mapeamento Dinâmico**: Seleção automática de colunas baseada no arquivo
-- **Validação de CPF**: Verificação automática de CPFs válidos
-- **Detecção de Dependentes Órfãos**: Identifica dependentes sem titular
-- **Formatação de Datas**: Conversão automática para formato dd/mm/aaaa
-- **Múltiplas Abas**: Geração de abas separadas por operadora
-- **Parâmetros Salvos**: Salva e carrega configurações personalizadas
-- **Design Responsivo**: Funciona em desktop, tablet e mobile
+## 📋 Campos Suportados
 
-### 📋 Campos Suportados
+A aplicação suporta mapeamento para os seguintes campos:
 
-#### Inclusão de Titular (52 campos)
-- Operadora, Apólice/Contrato, Sub, Vigência
-- Dados pessoais (Nome, CPF, Data Nascimento, Sexo)
-- Informações de plano e matrícula
-- Dados de endereço e contato
-- Informações bancárias e documentos
+- **Nome**: Nome completo da pessoa
+- **Email**: Endereço de email
+- **Telefone**: Número de telefone
+- **Endereço**: Endereço completo
+- **Cidade**: Nome da cidade
+- **Estado**: Sigla do estado
+- **CEP**: Código postal
+- **CPF**: Número do CPF
 
-#### Inclusão de Dependente (30 campos)
-- Dados do titular e dependente
-- Informações de parentesco e documentos
-- Datas de vigência e tutela
-- Dados de saúde e identificação
+## 🛠️ Como Usar
 
-#### Exclusão (20 campos)
-- Tipo de exclusão e motivos
-- Datas de cancelamento e demissão
-- Informações de identificação
+### 1. Configuração de Parâmetros
 
-## 🛠️ Tecnologias Utilizadas
+1. Clique na aba "Parâmetros" no topo da página
+2. Para cada campo, selecione qual coluna do seu arquivo Excel corresponde
+3. Clique em "Salvar Parâmetros" para guardar a configuração
 
-- **HTML5**: Estrutura semântica e acessível
-- **CSS3**: Design moderno com variáveis CSS e responsividade
-- **JavaScript ES6+**: Lógica de processamento e interação
+### 2. Upload e Conversão
+
+1. Volte para a aba "Upload"
+2. Arraste e solte seu arquivo Excel ou clique para selecionar
+3. Visualize a prévia dos dados carregados
+4. Clique em "Converter Arquivo" para processar
+5. O arquivo convertido será baixado automaticamente
+
+### 3. Template de Exemplo
+
+- Clique em "Baixar Template" para obter um arquivo de exemplo
+- Use o template como base para formatar seus dados
+
+## 🎨 Interface
+
+A aplicação possui uma interface moderna e intuitiva com:
+
+- **Design Responsivo**: Adapta-se a diferentes tamanhos de tela
+- **Animações Suaves**: Transições elegantes entre páginas
+- **Feedback Visual**: Notificações e indicadores de progresso
+- **Tema Moderno**: Gradientes e efeitos visuais atrativos
+
+## 🔧 Tecnologias Utilizadas
+
+- **HTML5**: Estrutura semântica
+- **CSS3**: Estilos modernos com Flexbox e Grid
+- **JavaScript ES6+**: Lógica da aplicação
 - **SheetJS (XLSX)**: Manipulação de arquivos Excel
-- **Google Fonts**: Tipografia Inter para melhor legibilidade
-- **Font Awesome**: Ícones modernos e consistentes
+- **Font Awesome**: Ícones
+- **LocalStorage**: Persistência de configurações
 
-## 🚀 Como Usar
+## 📱 Compatibilidade
 
-### 1. Upload do Arquivo
-- Arraste e solte seu arquivo Excel na área indicada
-- Ou clique para selecionar o arquivo
-- O sistema detectará automaticamente as colunas disponíveis
+- ✅ Chrome (recomendado)
+- ✅ Firefox
+- ✅ Safari
+- ✅ Edge
+- ✅ Dispositivos móveis
 
-### 2. Seleção do Tipo de Operação
-- Escolha o tipo de operação (Titular, Dependente, Exclusão, Geral)
-- Os campos relevantes serão exibidos automaticamente
+## 🚀 Como Executar
 
-### 3. Configuração de Parâmetros
-- Mapeie as colunas do seu arquivo para os campos do sistema
-- Use os parâmetros salvos para reutilizar configurações
-- Salve novas configurações com nomes personalizados
+1. Baixe todos os arquivos para uma pasta
+2. Abra o arquivo `index.html` em qualquer navegador moderno
+3. A aplicação funcionará completamente offline
 
-### 4. Conversão e Download
-- Clique em "Converter Arquivo"
-- O sistema processará os dados com validações
-- Baixe o arquivo convertido com formatação adequada
+## 📝 Estrutura de Arquivos
 
-## 📱 Acessibilidade
+```
+excel-converter-app/
+├── index.html          # Página principal
+├── styles.css          # Estilos da aplicação
+├── script.js           # Lógica JavaScript
+└── README.md           # Este arquivo
+```
 
-- **Contraste Alto**: Suporte a preferências de contraste do sistema
-- **Navegação por Teclado**: Foco visível e navegação completa
-- **Redução de Movimento**: Respeita preferências de movimento reduzido
-- **Modo Escuro**: Suporte automático ao modo escuro do sistema
-- **Responsivo**: Funciona em todos os tamanhos de tela
+## 🔒 Privacidade
 
-## 🔒 Privacidade e Segurança
+- Todos os processamentos são feitos localmente no navegador
+- Nenhum dado é enviado para servidores externos
+- As configurações são salvas apenas no seu navegador (localStorage)
 
-- **Processamento Local**: Todos os dados são processados no navegador
-- **Sem Upload de Dados**: Arquivos não são enviados para servidores
-- **Armazenamento Local**: Configurações salvas apenas no seu dispositivo
+## 🐛 Solução de Problemas
 
-## 📄 Licença
+### Arquivo não carrega
+- Verifique se o arquivo é um Excel válido (.xlsx ou .xls)
+- Certifique-se de que o arquivo não está corrompido
 
-Este projeto é de código aberto e está disponível sob a licença MIT.
+### Conversão não funciona
+- Configure os parâmetros de mapeamento primeiro
+- Verifique se as colunas selecionadas existem no arquivo
 
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-- Reportar bugs
-- Sugerir novas funcionalidades
-- Enviar pull requests
+### Interface não carrega corretamente
+- Use um navegador atualizado
+- Verifique se o JavaScript está habilitado
 
 ## 📞 Suporte
 
-Para dúvidas ou suporte, entre em contato através dos issues do GitHub.
+Para dúvidas ou problemas, verifique:
+1. Se está usando um navegador atualizado
+2. Se o arquivo Excel está no formato correto
+3. Se os parâmetros foram configurados adequadamente
+
+## 🔄 Versão
+
+**Versão atual**: 1.0.0
 
 ---
 
-**Desenvolvido com ❤️ para operadoras de saúde** 
+Desenvolvido com ❤️ para facilitar a conversão de arquivos Excel 

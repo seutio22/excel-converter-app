@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Excel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-excel"></i> Conversor de Excel</h1>
+            <nav>
+                <button class="nav-btn active" onclick="showPage('upload')">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+                <button class="nav-btn" onclick="showPage('params')">
+                    <i class="fas fa-cog"></i> Parâmetros
+                </button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Página de Upload -->
+            <div id="upload-page" class="page active">
+                <div class="upload-container">
+                    <div class="upload-area" id="upload-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Arraste e solte seu arquivo Excel aqui</h3>
+                        <p>ou clique para selecionar</p>
+                        <input type="file" id="file-input" accept=".xlsx,.xls" hidden>
+                    </div>
+                    
+                    <div class="file-info" id="file-info" style="display: none;">
+                        <div class="file-details">
+                            <i class="fas fa-file-excel"></i>
+                            <div>
+                                <h4 id="file-name"></h4>
+                                <p id="file-size"></p>
+                            </div>
+                            <button class="remove-btn" onclick="removeFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="preview-container" id="preview-container" style="display: none;">
+                        <h3><i class="fas fa-table"></i> Prévia dos Dados</h3>
+                        <div class="table-container">
+                            <table id="preview-table">
+                                <thead id="preview-header"></thead>
+                                <tbody id="preview-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-primary" id="convert-btn" onclick="convertFile()" disabled>
+                            <i class="fas fa-magic"></i> Converter Arquivo
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadTemplate()">
+                            <i class="fas fa-download"></i> Baixar Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Página de Parâmetros -->
+            <div id="params-page" class="page">
+                <div class="params-container">
+                    <h2><i class="fas fa-sliders-h"></i> Configuração de Parâmetros</h2>
+                    <p>Defina quais colunas representam cada tipo de dado para o transporte e personalização</p>
+                    
+                    <!-- Seleção do tipo de operação -->
+                    <div class="operation-selector">
+                        <h3>Tipo de Operação</h3>
+                        <div class="operation-options">
+                            <label class="operation-option">
+                                <input type="radio" name="operation-type" value="titular" onchange="showOperationParams()">
+                                <span class="operation-label">
+                                    <i class="fas fa-user"></i>
+                                    Inclusão de Titular
+                                </span>
+                            </label>
+                            <label class="operation-option">
+                                <input type="radio" name="operation-type" value="dependente" onchange="showOperationParams()">
+                                <span class="operation-label">
+                                    <i class="fas fa-users"></i>
+                                    Inclusão de Dependente
+                                </span>
+                            </label>
+                            <label class="operation-option">
+                                <input type="radio" name="operation-type" value="geral" onchange="showOperationParams()">
+                                <span class="operation-label">
+                                    <i class="fas fa-cog"></i>
+                                    Configuração Geral
+                                </span>
+                            </label>
+                            <label class="operation-option">
+                                <input type="radio" name="operation-type" value="exclusao" onchange="showOperationParams()">
+                                <span class="operation-label">
+                                    <i class="fas fa-user-minus"></i>
+                                    Exclusão
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Parâmetros para Inclusão de Titular -->
+                    <div id="titular-params" class="operation-params" style="display: none;">
+                        <h3>Parâmetros para Inclusão de Titular</h3>
+                        <div class="params-grid">
+                            <div class="param-group">
+                                <label for="operadora-col">Operadora:</label>
+                                <select id="operadora-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="apolice-col">Nº da apólice/contrato:</label>
+                                <select id="apolice-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sub-col">Nº Sub:</label>
+                                <select id="sub-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="inicio-vigencia-col">Inicio de Vigência:</label>
+                                <select id="inicio-vigencia-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="inicio-vigencia-programada-col">Início de Vigência Programada:</label>
+                                <select id="inicio-vigencia-programada-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="codigo-plano-col">Código/Nome do Plano:</label>
+                                <select id="codigo-plano-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="matricula-col">Matrícula:</label>
+                                <select id="matricula-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="codigo-dependente-col">Código Dependente:</label>
+                                <select id="codigo-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-admissao-col">Data de admissão:</label>
+                                <select id="data-admissao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-segurado-col">Nome Segurado:</label>
+                                <select id="nome-segurado-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sexo-col">Sexo:</label>
+                                <select id="sexo-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-nascimento-col">Data de Nascimento:</label>
+                                <select id="data-nascimento-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cpf-col">Nº CPF:</label>
+                                <select id="cpf-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="estado-civil-col">Estado Civil:</label>
+                                <select id="estado-civil-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="grau-parentesco-col">Grau de Parentesco:</label>
+                                <select id="grau-parentesco-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="peso-col">Peso:</label>
+                                <select id="peso-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="altura-col">Altura:</label>
+                                <select id="altura-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-tutela-col">Data da Tutela:</label>
+                                <select id="data-tutela-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-documento-col">Data do Documento:</label>
+                                <select id="data-documento-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-casamento-col">Data do Casamento:</label>
+                                <select id="data-casamento-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-mae-col">Nome da Mãe:</label>
+                                <select id="nome-mae-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-pai-col">Nome do Pai:</label>
+                                <select id="nome-pai-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="pis-col">PIS:</label>
+                                <select id="pis-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="rg-col">RG:</label>
+                                <select id="rg-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="orgao-emissor-col">Órgão Emissor:</label>
+                                <select id="orgao-emissor-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-expedicao-col">Data Expedição:</label>
+                                <select id="data-expedicao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="centro-custo-col">Nº Centro de Custo:</label>
+                                <select id="centro-custo-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-centro-custo-col">Nome Centro de Custo:</label>
+                                <select id="nome-centro-custo-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cargo-col">Cargo:</label>
+                                <select id="cargo-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="tipo-logradouro-col">Tipo de Logradouro:</label>
+                                <select id="tipo-logradouro-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-logradouro-col">Nome do Logradouro:</label>
+                                <select id="nome-logradouro-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="numero-col">Número:</label>
+                                <select id="numero-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="complemento-col">Complemento:</label>
+                                <select id="complemento-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="bairro-col">Bairro:</label>
+                                <select id="bairro-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cidade-col">Cidade:</label>
+                                <select id="cidade-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="estado-col">Estado:</label>
+                                <select id="estado-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cep-col">CEP:</label>
+                                <select id="cep-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cartao-saude-col">Cartão nacional de saúde:</label>
+                                <select id="cartao-saude-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="banco-col">Banco:</label>
+                                <select id="banco-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="agencia-col">Agência:</label>
+                                <select id="agencia-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="digito-agencia-col">Dígito da Agência:</label>
+                                <select id="digito-agencia-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="conta-corrente-col">Conta Corrente:</label>
+                                <select id="conta-corrente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="digito-conta-col">Dígito da conta corrente:</label>
+                                <select id="digito-conta-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="numero-nascido-vivo-col">Número de nascido vivo:</label>
+                                <select id="numero-nascido-vivo-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="telefone-col">Telefone:</label>
+                                <select id="telefone-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="email-col">E-mail:</label>
+                                <select id="email-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="lote-chamado-col">Lote ou Chamado:</label>
+                                <select id="lote-chamado-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="documento-col">Documento:</label>
+                                <select id="documento-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sequencia-col">Sequência:</label>
+                                <select id="sequencia-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="setor-col">Setor:</label>
+                                <select id="setor-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="lotacao-col">Lotação:</label>
+                                <select id="lotacao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="local-col">Local:</label>
+                                <select id="local-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="unidade-atendimento-col">Unidade de Atendimento:</label>
+                                <select id="unidade-atendimento-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="unidade-negociacao-col">Unidade de Negociação:</label>
+                                <select id="unidade-negociacao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Parâmetros para Inclusão de Dependente -->
+                    <div id="dependente-params" class="operation-params" style="display: none;">
+                        <h3>Parâmetros para Inclusão de Dependente</h3>
+                        <div class="params-grid">
+                            <div class="param-group">
+                                <label for="operadora-dependente-col">Operadora:</label>
+                                <select id="operadora-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="apolice-dependente-col">Nº da apólice/contrato:</label>
+                                <select id="apolice-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sub-dependente-col">Nº Sub:</label>
+                                <select id="sub-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="matricula-titular-col">Matrícula (Titular):</label>
+                                <select id="matricula-titular-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="certificado-col">Certificado:</label>
+                                <select id="certificado-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="codigo-dependente-col">Código Dependente:</label>
+                                <select id="codigo-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-titular-col">Nome do Titular:</label>
+                                <select id="nome-titular-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cpf-titular-col">CPF Titular:</label>
+                                <select id="cpf-titular-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-dependente-col">Nome Dependente:</label>
+                                <select id="nome-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cpf-dependente-col">CPF do Dependente:</label>
+                                <select id="cpf-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-nascimento-dependente-col">Data de Nascimento:</label>
+                                <select id="data-nascimento-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sexo-dependente-col">Sexo:</label>
+                                <select id="sexo-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="estado-civil-dependente-col">Estado Civil:</label>
+                                <select id="estado-civil-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="grau-parentesco-col">Grau de Parentesco:</label>
+                                <select id="grau-parentesco-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="peso-dependente-col">Peso:</label>
+                                <select id="peso-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="altura-dependente-col">Altura:</label>
+                                <select id="altura-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-tutela-dependente-col">Data da Tutela:</label>
+                                <select id="data-tutela-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-documento-dependente-col">Data do Documento:</label>
+                                <select id="data-documento-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-casamento-dependente-col">Data do Casamento:</label>
+                                <select id="data-casamento-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="inicio-vigencia-dependente-col">Inicio de Vigência:</label>
+                                <select id="inicio-vigencia-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="inicio-vigencia-programada-dependente-col">Início de Vigência Programada:</label>
+                                <select id="inicio-vigencia-programada-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-mae-dependente-col">Nome da Mãe do dependente:</label>
+                                <select id="nome-mae-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-pai-dependente-col">Nome do Pai:</label>
+                                <select id="nome-pai-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="numero-nascido-vivo-dependente-col">Número de nascido vivo:</label>
+                                <select id="numero-nascido-vivo-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cartao-saude-dependente-col">Cartão nacional de saúde (CNS):</label>
+                                <select id="cartao-saude-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="lote-chamado-dependente-col">Lote ou Chamado:</label>
+                                <select id="lote-chamado-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="documento-dependente-col">Documento:</label>
+                                <select id="documento-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sequencia-dependente-col">Sequencia:</label>
+                                <select id="sequencia-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="setor-dependente-col">Setor:</label>
+                                <select id="setor-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="lotacao-dependente-col">Lotação:</label>
+                                <select id="lotacao-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="local-dependente-col">Local:</label>
+                                <select id="local-dependente-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Parâmetros para Exclusão -->
+                    <div id="exclusao-params" class="operation-params" style="display: none;">
+                        <h3>Parâmetros para Exclusão</h3>
+                        <div class="params-grid">
+                            <div class="param-group">
+                                <label for="tipo-exclusao-col">Tipo de Exclusão:</label>
+                                <select id="tipo-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="apolice-exclusao-col">Nº da apólice/contrato:</label>
+                                <select id="apolice-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sub-exclusao-col">Nº Sub:</label>
+                                <select id="sub-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="operadora-exclusao-col">Operadora:</label>
+                                <select id="operadora-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="matricula-exclusao-col">Matrícula:</label>
+                                <select id="matricula-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="certificado-exclusao-col">Certificado:</label>
+                                <select id="certificado-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="codigo-dependente-exclusao-col">Código Dependente:</label>
+                                <select id="codigo-dependente-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-titular-exclusao-col">Nome do Titular:</label>
+                                <select id="nome-titular-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cpf-titular-exclusao-col">CPF Titular:</label>
+                                <select id="cpf-titular-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-demissao-col">Data de Demissão:</label>
+                                <select id="data-demissao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="nome-dependente-exclusao-col">Nome Dependente:</label>
+                                <select id="nome-dependente-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-cancelamento-col">Data de Cancelamento:</label>
+                                <select id="data-cancelamento-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="data-cancelamento-programada-col">Data de Cancelamento Programada:</label>
+                                <select id="data-cancelamento-programada-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="motivo-col">Motivo:</label>
+                                <select id="motivo-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="lote-chamado-exclusao-col">Lote ou Chamado:</label>
+                                <select id="lote-chamado-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="documento-exclusao-col">Documento:</label>
+                                <select id="documento-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="sequencia-exclusao-col">Sequencia:</label>
+                                <select id="sequencia-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="setor-exclusao-col">Setor:</label>
+                                <select id="setor-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="lotacao-exclusao-col">Lotação:</label>
+                                <select id="lotacao-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="local-exclusao-col">Local:</label>
+                                <select id="local-exclusao-col" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Parâmetros Gerais -->
+                    <div id="geral-params" class="operation-params" style="display: none;">
+                        <h3>Configuração Geral</h3>
+                        <div class="params-grid">
+                            <div class="param-group">
+                                <label for="nome-col-geral">Nome:</label>
+                                <select id="nome-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="email-col-geral">Email:</label>
+                                <select id="email-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="telefone-col-geral">Telefone:</label>
+                                <select id="telefone-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="endereco-col-geral">Endereço:</label>
+                                <select id="endereco-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cidade-col-geral">Cidade:</label>
+                                <select id="cidade-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="estado-col-geral">Estado:</label>
+                                <select id="estado-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cep-col-geral">CEP:</label>
+                                <select id="cep-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                            
+                            <div class="param-group">
+                                <label for="cpf-col-geral">CPF:</label>
+                                <select id="cpf-col-geral" class="param-select">
+                                    <option value="">Selecione a coluna</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="param-actions">
+                        <button class="btn btn-primary" onclick="saveParamsWithName()">
+                            <i class="fas fa-save"></i> Salvar Parâmetros
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadSavedParamsList()">
+                            <i class="fas fa-folder-open"></i> Carregar Parâmetros
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetParams()">
+                            <i class="fas fa-undo"></i> Resetar
+                        </button>
+                    </div>
+                    
+                    <!-- Lista de parâmetros salvos -->
+                    <div class="saved-params-section" id="saved-params-section" style="display: none;">
+                        <h3>Parâmetros Salvos</h3>
+                        <div class="saved-params-list" id="saved-params-list">
+                            <!-- Lista será preenchida dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Progresso -->
+    <div id="progress-modal" class="modal">
+        <div class="modal-content">
+            <h3>Convertendo arquivo...</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p id="progress-text">Processando...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
