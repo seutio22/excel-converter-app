@@ -1,0 +1,30 @@
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Arquivos de Excel temporários
+~$*.xlsx
+~$*.xls
+
+# Node modules (se houver)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 
